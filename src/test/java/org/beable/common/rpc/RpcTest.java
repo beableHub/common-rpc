@@ -1,9 +1,13 @@
 package org.beable.common.rpc;
 
 import lombok.extern.slf4j.Slf4j;
-import org.beable.common.rpc.core.provider.zk.ZkServiceProvider;
+import org.beable.common.rpc.core.config.RpcServiceConfig;
+import org.beable.common.rpc.core.provider.support.DefaultServiceProvider;
+import org.beable.common.rpc.core.proxy.RpcClientProxy;
 import org.beable.common.rpc.core.remoting.dto.RpcRequest;
 import org.beable.common.rpc.core.remoting.dto.RpcResponse;
+import org.beable.common.rpc.core.remoting.transport.Client;
+import org.beable.common.rpc.core.remoting.transport.socket.SocketClient;
 import org.beable.common.rpc.core.remoting.transport.socket.SocketServer;
 import org.junit.Test;
 
@@ -46,12 +50,24 @@ public class RpcTest {
         }
     }
 
+    @Test
+    public void test_proxy(){
+        RpcServiceConfig config = new RpcServiceConfig();
+        TestService testService = new TestServiceImpl();
+        final Method method = TestService.class.getMethods()[0];
+        config.setService(testService);
+        Client client = new SocketClient();
+        RpcClientProxy proxy = new RpcClientProxy(client,config);
+        Object result = proxy.invoke(testService, method, new Object[]{"test_proxy"});
+        log.info("result:{}",result);
+    }
+
 
     @Test
     public void test_server(){
-        ZkServiceProvider zkServiceProvider = ZkServiceProvider.getInstance();
+        DefaultServiceProvider defaultServiceProvider = DefaultServiceProvider.getInstance();
         TestService testService = new TestServiceImpl();
-        zkServiceProvider.addService("org.beable.common.rpc.TestService#default-group#1.0",testService);
+        defaultServiceProvider.addService("org.beable.common.rpc.TestService#default-group#1.0",testService);
         SocketServer server = new SocketServer();
         server.start();
     }

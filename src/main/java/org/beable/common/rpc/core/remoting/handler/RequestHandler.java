@@ -2,7 +2,7 @@ package org.beable.common.rpc.core.remoting.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.beable.common.rpc.core.provider.ServiceProvider;
-import org.beable.common.rpc.core.provider.zk.ZkServiceProvider;
+import org.beable.common.rpc.core.provider.support.DefaultServiceProvider;
 import org.beable.common.rpc.core.remoting.dto.RpcRequest;
 
 import java.lang.reflect.InvocationTargetException;
@@ -14,7 +14,7 @@ import java.lang.reflect.Method;
 @Slf4j
 public class RequestHandler {
 
-    public final ServiceProvider serviceProvider = ZkServiceProvider.getInstance();
+    public final ServiceProvider serviceProvider = DefaultServiceProvider.getInstance();
 
     public RequestHandler(){
 
