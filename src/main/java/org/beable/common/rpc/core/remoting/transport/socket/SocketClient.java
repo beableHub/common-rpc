@@ -10,6 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 
 
 /**
@@ -25,7 +26,7 @@ public class SocketClient implements Client {
     @Override
     public Object send(RpcRequest rpcRequest) {
         // TODO
-        InetSocketAddress inetSocketAddress = new InetSocketAddress("10.118.32.165", 9988);
+        SocketAddress inetSocketAddress = new InetSocketAddress("10.118.32.165", 9988);
         try(Socket socket = new Socket()){
             socket.connect(inetSocketAddress);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
