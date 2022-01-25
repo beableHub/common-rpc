@@ -7,6 +7,8 @@ import org.beable.common.rpc.core.proxy.RpcClientProxy;
 import org.beable.common.rpc.core.remoting.dto.RpcRequest;
 import org.beable.common.rpc.core.remoting.dto.RpcResponse;
 import org.beable.common.rpc.core.remoting.transport.Client;
+import org.beable.common.rpc.core.remoting.transport.netty.NettyRpcClient;
+import org.beable.common.rpc.core.remoting.transport.netty.NettyRpcServer;
 import org.beable.common.rpc.core.remoting.transport.socket.SocketClient;
 import org.beable.common.rpc.core.remoting.transport.socket.SocketServer;
 import org.junit.Test;
@@ -56,7 +58,7 @@ public class RpcTest {
         TestService testService = new TestServiceImpl();
         final Method method = TestService.class.getMethods()[0];
         config.setService(testService);
-        Client client = new SocketClient();
+        Client client = new NettyRpcClient();
         RpcClientProxy proxy = new RpcClientProxy(client,config);
         Object result = proxy.invoke(testService, method, new Object[]{"test_proxy"});
         log.info("result:{}",result);
@@ -68,7 +70,7 @@ public class RpcTest {
         DefaultServiceProvider defaultServiceProvider = DefaultServiceProvider.getInstance();
         TestService testService = new TestServiceImpl();
         defaultServiceProvider.addService("org.beable.common.rpc.TestService#default-group#1.0",testService);
-        SocketServer server = new SocketServer();
+        NettyRpcServer server = new NettyRpcServer();
         server.start();
     }
 }

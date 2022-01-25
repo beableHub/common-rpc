@@ -9,11 +9,15 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.beable.common.rpc.core.remoting.constants.MessageType;
+import org.beable.common.rpc.core.remoting.dto.RpcMessage;
 import org.beable.common.rpc.core.remoting.dto.RpcRequest;
+import org.beable.common.rpc.core.remoting.dto.RpcResponse;
 import org.beable.common.rpc.core.remoting.transport.Client;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -50,17 +54,36 @@ public class NettyRpcClient implements Client {
     }
 
     @Override
-    public Object send(RpcRequest rpcRequest) {
+    public Object send(RpcRequest rpcRequest){
         // TODO
         SocketAddress socketAddress = new InetSocketAddress("10.118.32.165", 9988);
+        // build return value
+        CompletableFuture<RpcResponse<Object>> resultFuture = new CompletableFuture<>();
         // get  server address related channel
         Channel channel = doConnect(socketAddress);
         if (channel.isActive()){
 
+            RpcMessage rpcMessage = RpcMessage.builder()
+                    .messageType(MessageType.REQUEST.getValue())
+                    .data(rpcRequest)
+                    .build();
+            channel.writeAndFlush(rpcMessage).addListener((ChannelFutureListener) future -> {
+                if (future.isSuccess()) {
+                    log.info("client send message: [{}]", rpcMessage);
+                } else {
+                    future.channel().close();
+                    resultFuture.completeExceptionally(future.cause());
+                    log.error("Send failed:", future.cause());
+                }
+            });
         }
-
-
-        return null;
+        RpcResponse<Object> response = new RpcResponse<>();
+        try {
+            response = resultFuture.get();
+        } catch (Exception e) {
+            log.error("send error",e);
+        }
+        return Objects.nonNull(response)?response.getData():null;
     }
 
     public Channel doConnect(SocketAddress address){
