@@ -30,6 +30,8 @@ public class NettyRpcClient implements Client {
     private final Bootstrap bootstrap;
     private final EventLoopGroup eventLoopGroup;
 
+    private final UnprocessedRequests unprocessedRequests = UnprocessedRequests.getInstance();
+
     public NettyRpcClient(){
         // initialize resources
         eventLoopGroup = new NioEventLoopGroup();
@@ -62,7 +64,7 @@ public class NettyRpcClient implements Client {
         // get  server address related channel
         Channel channel = doConnect(socketAddress);
         if (channel.isActive()){
-
+            unprocessedRequests.put(rpcRequest.getRequestId(),resultFuture);
             RpcMessage rpcMessage = RpcMessage.builder()
                     .messageType(MessageType.REQUEST.getValue())
                     .data(rpcRequest)
@@ -70,6 +72,7 @@ public class NettyRpcClient implements Client {
             channel.writeAndFlush(rpcMessage).addListener((ChannelFutureListener) future -> {
                 if (future.isSuccess()) {
                     log.info("client send message: [{}]", rpcMessage);
+
                 } else {
                     future.channel().close();
                     resultFuture.completeExceptionally(future.cause());

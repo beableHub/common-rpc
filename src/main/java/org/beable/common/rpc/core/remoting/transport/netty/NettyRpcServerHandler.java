@@ -34,7 +34,7 @@ public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
                 log.info(String.format("server get result: %s", result.toString()));
                 rpcMessage.setMessageType(MessageType.RESPONSE.getValue());
                 if (ctx.channel().isActive() && ctx.channel().isWritable()) {
-                    RpcResponse<Object> response = RpcResponse.success(result, UUID.randomUUID().toString());
+                    RpcResponse<Object> response = RpcResponse.success(result, rpcRequest.getRequestId());
                     rpcMessage.setData(response);
                 } else {
                     RpcResponse<Object> rpcResponse = RpcResponse.fail(500);
