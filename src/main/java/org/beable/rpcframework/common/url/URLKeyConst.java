@@ -8,5 +8,12 @@ package org.beable.rpcframework.common.url;
  */
 public interface URLKeyConst {
 
+    String TIMEOUT = "timeout";
+
     String INTERFACE = "interface";
+
+    String PROTOCOL = "protocol";
+
+    String VERSION = "version";
+    
 }

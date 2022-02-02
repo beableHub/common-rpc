@@ -9,6 +9,10 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.beable.rpcframework.common.extension.ExtensionLoader;
+import org.beable.rpcframework.common.url.URL;
+import org.beable.rpcframework.register.Registry;
+import org.beable.rpcframework.register.ServiceDiscovery;
 import org.beable.rpcframework.remoting.constants.MessageType;
 import org.beable.rpcframework.remoting.dto.RpcMessage;
 import org.beable.rpcframework.remoting.dto.RpcRequest;
@@ -32,6 +36,8 @@ public class NettyRpcClient implements Client {
 
     private final UnprocessedRequests unprocessedRequests = UnprocessedRequests.getInstance();
 
+    private final ServiceDiscovery serviceDiscovery;
+
     public NettyRpcClient(){
         // initialize resources
         eventLoopGroup = new NioEventLoopGroup();
@@ -53,12 +59,12 @@ public class NettyRpcClient implements Client {
                         p.addLast(new NettyRpcClientHandler());
                     }
                 });
+        serviceDiscovery = ExtensionLoader.getExtensionLoader(ServiceDiscovery.class).getExtension("zk");
     }
 
     @Override
     public Object send(RpcRequest rpcRequest){
-        // TODO
-        SocketAddress socketAddress = new InetSocketAddress("10.118.32.165", 9988);
+        SocketAddress socketAddress = serviceDiscovery.lookupService(rpcRequest);
         // build return value
         CompletableFuture<RpcResponse<Object>> resultFuture = new CompletableFuture<>();
         // get  server address related channel

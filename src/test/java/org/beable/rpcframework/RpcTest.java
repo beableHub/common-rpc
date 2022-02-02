@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.beable.rpcframework.common.core.config.RpcServiceConfig;
 import org.beable.rpcframework.common.core.provider.support.DefaultServiceProvider;
 import org.beable.rpcframework.common.core.proxy.RpcClientProxy;
+import org.beable.rpcframework.common.extension.ExtensionLoader;
 import org.beable.rpcframework.remoting.dto.RpcRequest;
 import org.beable.rpcframework.remoting.dto.RpcResponse;
 import org.beable.rpcframework.remoting.transport.Client;
@@ -56,7 +57,7 @@ public class RpcTest {
         TestService testService = new TestServiceImpl();
         final Method method = TestService.class.getMethods()[0];
         config.setService(testService);
-        Client client = new NettyRpcClient();
+        Client client = ExtensionLoader.getExtensionLoader(Client.class).getExtension("netty");
         RpcClientProxy proxy = new RpcClientProxy(client,config);
         Object result = proxy.invoke(testService, method, new Object[]{"test_proxy"});
         log.info("result:{}",result);
@@ -67,7 +68,11 @@ public class RpcTest {
     public void test_server(){
         DefaultServiceProvider defaultServiceProvider = DefaultServiceProvider.getInstance();
         TestService testService = new TestServiceImpl();
-        defaultServiceProvider.addService("org.beable.common.rpc.TestService#default-group#1.0",testService);
+        RpcServiceConfig rpcServiceConfig = new RpcServiceConfig();
+        rpcServiceConfig.setService(testService);
+        rpcServiceConfig.setVersion("1.0");
+        rpcServiceConfig.setGroup("default-group");
+        defaultServiceProvider.publishService(rpcServiceConfig);
         NettyRpcServer server = new NettyRpcServer();
         server.start();
     }

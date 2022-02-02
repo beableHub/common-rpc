@@ -22,7 +22,7 @@ public class RequestHandler {
 
     public Object handle(RpcRequest rpcRequest){
         // 读取服务
-        Object service = serviceProvider.getService(rpcRequest.getRpcServiceName());
+        Object service = serviceProvider.getService(rpcRequest.getInterfaceName());
         // 执行
         return invokeTargetMethod(rpcRequest,service);
     }

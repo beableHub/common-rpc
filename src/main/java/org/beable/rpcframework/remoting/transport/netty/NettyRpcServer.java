@@ -1,5 +1,6 @@
 package org.beable.rpcframework.remoting.transport.netty;
 
+import cn.hutool.core.net.NetUtil;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -19,11 +20,11 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class NettyRpcServer {
 
-    private static final int PORT = 9988;
+    public static final int PORT = 9988;
 
     @SneakyThrows
     public void start(){
-        String host = InetAddress.getLocalHost().getHostAddress();
+        String host = NetUtil.getLocalhostStr();
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workGroup = new NioEventLoopGroup();
         DefaultEventExecutorGroup serviceHandlerGroup = new DefaultEventExecutorGroup(

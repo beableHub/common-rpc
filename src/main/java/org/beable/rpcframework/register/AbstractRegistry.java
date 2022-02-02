@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -33,6 +34,7 @@ public abstract class AbstractRegistry implements Registry{
         doRegister(url);
         // 添加到本地缓存
         addToLocalCache(url);
+        log.info("register: {}", url.toFullString());
 
     }
 
@@ -44,7 +46,7 @@ public abstract class AbstractRegistry implements Registry{
         registered.get(serviceName).add(url.toString());
     }
 
-    private String getServiceNameFromURL(URL url) {
+    public String getServiceNameFromURL(URL url) {
         return url.getParam(URLKeyConst.INTERFACE,url.getPath());
     }
 
@@ -57,6 +59,25 @@ public abstract class AbstractRegistry implements Registry{
 
     @Override
     public List<URL> lookup(URL condition) {
-        return null;
+        String serviceName = getServiceNameFromURL(condition);
+        if (registered.containsKey(serviceName)){
+            return registered.get(serviceName).stream().map(URL::valueOf).collect(Collectors.toList());
+        }
+        List<URL> urls = reset(condition);
+        log.info("lookup:{}",urls);
+        return urls;
     }
+
+    public List<URL> reset(URL condition) {
+        String serviceName = getServiceNameFromURL(condition);
+        registered.remove(serviceName);
+        List<URL> urls = doLookup(condition);
+        for (URL url : urls){
+            addToLocalCache(url);
+        }
+        log.info("reset:{}",urls);
+        return urls;
+    }
+
+    protected abstract List<URL> doLookup(URL condition);
 }

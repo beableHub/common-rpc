@@ -9,7 +9,7 @@ public interface ServiceProvider {
 
     Object getService(String serviceName);
 
-    void addService(String serviceName,Object service);
+    void addService(RpcServiceConfig config);
 
     void publishService(RpcServiceConfig config);
 }

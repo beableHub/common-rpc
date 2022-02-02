@@ -46,6 +46,7 @@ public class URLParser {
         for (Map.Entry<String,String> param : params.entrySet()){
             if (isFirst) {
                 buf.append("?");
+                isFirst = false;
             }else {
                 buf.append("&");
             }
